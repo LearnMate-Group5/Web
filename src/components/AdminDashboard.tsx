@@ -8,7 +8,7 @@ const AdminDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [pageNumber, setPageNumber] = useState(1);
-  const [pageSize] = useState(20);
+  const [pageSize] = useState(8);
 
   const fetchUsers = async () => {
     try {
