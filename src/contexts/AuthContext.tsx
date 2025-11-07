@@ -15,12 +15,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Check for existing auth data on mount
   useEffect(() => {
-    const authData = storageService.getAuthData();
-    if (authData.token && authData.user) {
-      setToken(authData.token);
-      setUser(authData.user);
+    try {
+      const authData = storageService.getAuthData();
+      if (authData.token && authData.user) {
+        setToken(authData.token);
+        setUser(authData.user);
+      }
+    } catch (error) {
+      console.error('Error loading auth data:', error);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }, []);
 
   const login = async (email: string, password: string): Promise<void> => {
@@ -36,7 +41,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setToken(response.value.accessToken);
         setUser(response.value.user);
       } else {
-        throw new Error(response.error.description || 'Login failed');
+        throw new Error(response.error?.description || 'Login failed');
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -55,6 +60,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const isAuthenticated = !!(token && user);
 
+  // Always provide a valid context value, even during loading
   const value: AuthContextType = {
     user,
     token,
@@ -64,6 +70,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isLoading
   };
 
+  // Ensure context is always provided
   return (
     <AuthContext.Provider value={value}>
       {children}

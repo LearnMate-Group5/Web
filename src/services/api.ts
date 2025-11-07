@@ -5,7 +5,16 @@ import {
   ApiResponse, 
   UserListResponse, 
   RoleUpdateRequest, 
-  ActivationRequest 
+  ActivationRequest,
+  Book,
+  BookListResponse,
+  BookListParams,
+  CreateBookRequest,
+  UpdateBookRequest,
+  Chapter,
+  CreateChapterRequest,
+  UpdateChapterRequest,
+  Category
 } from '../types';
 
 // Auth services
@@ -62,14 +71,732 @@ export const userService = {
   }
 };
 
+// Book management services
+export const bookService = {
+  // Get book list with filters
+  getBookList: async (params?: BookListParams): Promise<ApiResponse<BookListResponse>> => {
+    try {
+      const response = await api.get<any>('/Book', {
+        params: {
+          onlyActive: params?.onlyActive ?? false,
+          categoryId: params?.categoryId,
+          categoryName: params?.categoryName
+        }
+      });
+      
+      // Check if response is a direct array (API returns [...])
+      if (Array.isArray(response.data)) {
+        // Wrap array in ApiResponse format
+        return {
+          value: { books: response.data } as BookListResponse,
+          isSuccess: true,
+          isFailure: false
+        };
+      }
+      
+      // If response is already ApiResponse format, return as is
+      if (response.data && typeof response.data === 'object' && 'isSuccess' in response.data) {
+        return response.data;
+      }
+      
+      // If response has a value property that might contain books
+      if (response.data && response.data.value) {
+        const value = response.data.value;
+        if (Array.isArray(value)) {
+          return {
+            value: { books: value } as BookListResponse,
+            isSuccess: true,
+            isFailure: false
+          };
+        }
+        if (value && typeof value === 'object' && 'books' in value) {
+          return {
+            value: value as BookListResponse,
+            isSuccess: true,
+            isFailure: false
+          };
+        }
+      }
+      
+      // Fallback: empty books array
+      return {
+        value: { books: [] } as BookListResponse,
+        isSuccess: true,
+        isFailure: false
+      };
+    } catch (error: any) {
+      // Handle axios errors
+      if (error.response) {
+        // Server responded with error status
+        return {
+          value: { books: [] } as BookListResponse,
+          isSuccess: false,
+          isFailure: true,
+          error: {
+            code: error.response.status?.toString() || 'UNKNOWN',
+            description: error.response.data?.error?.description || error.response.data?.message || 'Không thể tải danh sách sách'
+          }
+        };
+      } else if (error.request) {
+        // Request made but no response received
+        throw new Error('Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.');
+      } else {
+        throw error;
+      }
+    }
+  },
+
+  // Get book by ID
+  getBookById: async (bookId: string): Promise<ApiResponse<Book>> => {
+    const response = await api.get<ApiResponse<Book>>(`/Book/${bookId}`);
+    return response.data;
+  },
+
+  // Create new book
+  createBook: async (bookData: CreateBookRequest): Promise<ApiResponse<Book>> => {
+    try {
+      const formData = new FormData();
+      formData.append('Title', bookData.title);
+      formData.append('Author', bookData.author);
+      formData.append('Description', bookData.description);
+      
+      if (bookData.imageFile) {
+        formData.append('ImageFile', bookData.imageFile);
+      }
+      
+      // Append categories array
+      bookData.categories.forEach((category, index) => {
+        formData.append(`Categories[${index}]`, category);
+      });
+
+      console.log('Creating book with data:', {
+        title: bookData.title,
+        author: bookData.author,
+        categories: bookData.categories,
+        hasImage: !!bookData.imageFile
+      });
+
+      const response = await api.post<any>('/Book', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      
+      console.log('Create book response:', response);
+      console.log('Create book response.data:', response.data);
+      console.log('Create book response.status:', response.status);
+      
+      // Check if response is already ApiResponse format
+      if (response.data && typeof response.data === 'object' && 'isSuccess' in response.data) {
+        return response.data;
+      }
+      
+      // If response is a direct Book object
+      if (response.data && response.data.bookId) {
+        return {
+          value: response.data,
+          isSuccess: true,
+          isFailure: false
+        };
+      }
+      
+      // If response has a value property
+      if (response.data && response.data.value) {
+        return {
+          value: response.data.value,
+          isSuccess: true,
+          isFailure: false
+        };
+      }
+      
+      // Default: success if status is 200/201
+      if (response.status === 200 || response.status === 201) {
+        return {
+          value: response.data || {} as Book,
+          isSuccess: true,
+          isFailure: false
+        };
+      }
+      
+      throw new Error('Invalid response format');
+    } catch (error: any) {
+      console.error('Error in createBook:', error);
+      if (error.response) {
+        console.error('Error response:', error.response.data);
+        console.error('Error status:', error.response.status);
+        
+        // Handle 409 Conflict specifically
+        if (error.response.status === 409) {
+          const errorMessage = error.response.data?.error?.description 
+            || error.response.data?.message 
+            || error.response.data?.title?.[0] // Validation error from ASP.NET
+            || 'Sách này đã tồn tại. Vui lòng kiểm tra tên sách hoặc tác giả.';
+          
+          return {
+            value: {} as Book,
+            isSuccess: false,
+            isFailure: true,
+            error: {
+              code: '409',
+              description: errorMessage
+            }
+          };
+        }
+        
+        return {
+          value: {} as Book,
+          isSuccess: false,
+          isFailure: true,
+          error: {
+            code: error.response.status?.toString() || 'UNKNOWN',
+            description: error.response.data?.error?.description 
+              || error.response.data?.message 
+              || error.response.data?.title?.[0] // Validation error
+              || 'Không thể thêm sách'
+          }
+        };
+      } else if (error.request) {
+        throw new Error('Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.');
+      } else {
+        throw error;
+      }
+    }
+  },
+
+  // Update book
+  updateBook: async (bookId: string, bookData: UpdateBookRequest): Promise<ApiResponse<Book>> => {
+    try {
+      const formData = new FormData();
+      formData.append('Title', bookData.title);
+      formData.append('Author', bookData.author);
+      formData.append('Description', bookData.description);
+      formData.append('IsActive', bookData.isActive.toString());
+      formData.append('ClearImage', bookData.clearImage.toString());
+      
+      if (bookData.imageFile) {
+        formData.append('ImageFile', bookData.imageFile);
+      }
+      
+      // Append categories array
+      bookData.categories.forEach((category, index) => {
+        formData.append(`Categories[${index}]`, category);
+      });
+
+      console.log('Updating book with data:', {
+        bookId,
+        title: bookData.title,
+        author: bookData.author,
+        categories: bookData.categories,
+        isActive: bookData.isActive,
+        hasImage: !!bookData.imageFile
+      });
+
+      const response = await api.put<any>(`/Book/${bookId}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      
+      console.log('Update book response:', response);
+      console.log('Update book response.data:', response.data);
+      console.log('Update book response.status:', response.status);
+      
+      // Check if response is already ApiResponse format
+      if (response.data && typeof response.data === 'object' && 'isSuccess' in response.data) {
+        return response.data;
+      }
+      
+      // If response is a direct Book object
+      if (response.data && response.data.bookId) {
+        return {
+          value: response.data,
+          isSuccess: true,
+          isFailure: false
+        };
+      }
+      
+      // If response has a value property
+      if (response.data && response.data.value) {
+        return {
+          value: response.data.value,
+          isSuccess: true,
+          isFailure: false
+        };
+      }
+      
+      // Default: success if status is 200
+      if (response.status === 200) {
+        return {
+          value: response.data || {} as Book,
+          isSuccess: true,
+          isFailure: false
+        };
+      }
+      
+      throw new Error('Invalid response format');
+    } catch (error: any) {
+      console.error('Error in updateBook:', error);
+      if (error.response) {
+        console.error('Error response:', error.response.data);
+        console.error('Error status:', error.response.status);
+        
+        // Handle 409 Conflict specifically
+        if (error.response.status === 409) {
+          const errorMessage = error.response.data?.error?.description 
+            || error.response.data?.message 
+            || error.response.data?.title?.[0] // Validation error from ASP.NET
+            || 'Sách này đã tồn tại. Vui lòng kiểm tra tên sách hoặc tác giả.';
+          
+          return {
+            value: {} as Book,
+            isSuccess: false,
+            isFailure: true,
+            error: {
+              code: '409',
+              description: errorMessage
+            }
+          };
+        }
+        
+        return {
+          value: {} as Book,
+          isSuccess: false,
+          isFailure: true,
+          error: {
+            code: error.response.status?.toString() || 'UNKNOWN',
+            description: error.response.data?.error?.description 
+              || error.response.data?.message 
+              || error.response.data?.title?.[0] // Validation error
+              || 'Không thể cập nhật sách'
+          }
+        };
+      } else if (error.request) {
+        throw new Error('Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.');
+      } else {
+        throw error;
+      }
+    }
+  },
+
+  // Delete book
+  deleteBook: async (bookId: string): Promise<ApiResponse<any>> => {
+    try {
+      const response = await api.delete<any>(`/Book/${bookId}`);
+      
+      console.log('Delete book response:', response);
+      console.log('Delete book response.data:', response.data);
+      console.log('Delete book response.status:', response.status);
+      
+      // If status is 200/204 and no error, consider it success
+      if (response.status === 200 || response.status === 204) {
+        // Check if response is already ApiResponse format
+        if (response.data && typeof response.data === 'object' && 'isSuccess' in response.data) {
+          return response.data;
+        }
+        
+        // If response is empty or null, consider it success (common for DELETE)
+        if (!response.data || response.data === null || response.data === '') {
+          return {
+            value: {},
+            isSuccess: true,
+            isFailure: false
+          };
+        }
+        
+        // If response has a value property
+        if (response.data && response.data.value !== undefined) {
+          return {
+            value: response.data.value,
+            isSuccess: true,
+            isFailure: false
+          };
+        }
+        
+        // Default: success if status is 200/204
+        return {
+          value: {},
+          isSuccess: true,
+          isFailure: false
+        };
+      }
+      
+      // If status is not 200/204, treat as error
+      return {
+        value: {},
+        isSuccess: false,
+        isFailure: true,
+        error: {
+          code: response.status?.toString() || 'UNKNOWN',
+          description: response.data?.error?.description || response.data?.message || 'Không thể xóa sách'
+        }
+      };
+    } catch (error: any) {
+      console.error('Error in deleteBook:', error);
+      if (error.response) {
+        console.error('Error response:', error.response.data);
+        console.error('Error status:', error.response.status);
+        
+        // If status is 200/204, consider it success even if caught as error
+        if (error.response.status === 200 || error.response.status === 204) {
+          return {
+            value: {},
+            isSuccess: true,
+            isFailure: false
+          };
+        }
+        
+        return {
+          value: {},
+          isSuccess: false,
+          isFailure: true,
+          error: {
+            code: error.response.status?.toString() || 'UNKNOWN',
+            description: error.response.data?.error?.description || error.response.data?.message || 'Không thể xóa sách'
+          }
+        };
+      } else if (error.request) {
+        throw new Error('Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.');
+      } else {
+        throw error;
+      }
+    }
+  }
+};
+
+// Chapter management services
+export const chapterService = {
+  // Get chapters for a book
+  getChaptersByBookId: async (bookId: string): Promise<ApiResponse<Chapter[]>> => {
+    try {
+      const response = await api.get<any>(`/Book/${bookId}/chapters`);
+      
+      // Debug: log response to check structure
+      console.log('Chapter API Response:', response.data);
+      console.log('Response type:', typeof response.data);
+      console.log('Is array:', Array.isArray(response.data));
+      
+      // Check if response is a direct array (API returns [...])
+      if (Array.isArray(response.data)) {
+        console.log('Returning direct array with', response.data.length, 'chapters');
+        return {
+          value: response.data,
+          isSuccess: true,
+          isFailure: false
+        };
+      }
+      
+      // If response is already ApiResponse format, return as is
+      if (response.data && typeof response.data === 'object' && 'isSuccess' in response.data) {
+        console.log('Returning ApiResponse format');
+        return response.data;
+      }
+      
+      // If response has a value property
+      if (response.data && response.data.value) {
+        const value = response.data.value;
+        if (Array.isArray(value)) {
+          console.log('Returning value array with', value.length, 'chapters');
+          return {
+            value: value,
+            isSuccess: true,
+            isFailure: false
+          };
+        }
+      }
+      
+      // Fallback: empty chapters array
+      console.warn('Unexpected response format, returning empty array. Response:', response.data);
+      return {
+        value: [],
+        isSuccess: true,
+        isFailure: false
+      };
+    } catch (error: any) {
+      console.error('Error in getChaptersByBookId:', error);
+      if (error.response) {
+        console.error('Error response:', error.response.data);
+        return {
+          value: [],
+          isSuccess: false,
+          isFailure: true,
+          error: {
+            code: error.response.status?.toString() || 'UNKNOWN',
+            description: error.response.data?.error?.description || error.response.data?.message || 'Không thể tải danh sách chương'
+          }
+        };
+      } else if (error.request) {
+        throw new Error('Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.');
+      } else {
+        throw error;
+      }
+    }
+  },
+
+  // Get chapter by ID
+  getChapterById: async (bookId: string, chapterId: string): Promise<ApiResponse<Chapter>> => {
+    try {
+      const response = await api.get<any>(`/Book/${bookId}/chapters/${chapterId}`);
+      
+      // Check if response is already ApiResponse format
+      if (response.data && typeof response.data === 'object' && 'isSuccess' in response.data) {
+        return response.data;
+      }
+      
+      // If response is a direct Chapter object
+      if (response.data && response.data.chapterId) {
+        return {
+          value: response.data,
+          isSuccess: true,
+          isFailure: false
+        };
+      }
+      
+      // If response has a value property
+      if (response.data && response.data.value) {
+        return {
+          value: response.data.value,
+          isSuccess: true,
+          isFailure: false
+        };
+      }
+      
+      throw new Error('Invalid response format');
+    } catch (error: any) {
+      if (error.response) {
+        return {
+          value: {} as Chapter,
+          isSuccess: false,
+          isFailure: true,
+          error: {
+            code: error.response.status?.toString() || 'UNKNOWN',
+            description: error.response.data?.error?.description || error.response.data?.message || 'Không thể tải chương'
+          }
+        };
+      } else if (error.request) {
+        throw new Error('Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.');
+      } else {
+        throw error;
+      }
+    }
+  },
+
+  // Create new chapter
+  createChapter: async (bookId: string, chapterData: CreateChapterRequest): Promise<ApiResponse<Chapter>> => {
+    try {
+      const response = await api.post<any>(`/Book/${bookId}/chapters`, {
+        pageIndex: chapterData.pageIndex,
+        title: chapterData.title,
+        content: chapterData.content
+      }, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      // Check if response is already ApiResponse format
+      if (response.data && typeof response.data === 'object' && 'isSuccess' in response.data) {
+        return response.data;
+      }
+      
+      // If response is a direct Chapter object
+      if (response.data && response.data.chapterId) {
+        return {
+          value: response.data,
+          isSuccess: true,
+          isFailure: false
+        };
+      }
+      
+      // If response has a value property
+      if (response.data && response.data.value) {
+        return {
+          value: response.data.value,
+          isSuccess: true,
+          isFailure: false
+        };
+      }
+      
+      throw new Error('Invalid response format');
+    } catch (error: any) {
+      if (error.response) {
+        return {
+          value: {} as Chapter,
+          isSuccess: false,
+          isFailure: true,
+          error: {
+            code: error.response.status?.toString() || 'UNKNOWN',
+            description: error.response.data?.error?.description || error.response.data?.message || 'Không thể thêm chương'
+          }
+        };
+      } else if (error.request) {
+        throw new Error('Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.');
+      } else {
+        throw error;
+      }
+    }
+  },
+
+  // Update chapter
+  updateChapter: async (bookId: string, chapterId: string, chapterData: UpdateChapterRequest): Promise<ApiResponse<Chapter>> => {
+    try {
+      const response = await api.put<any>(`/Book/${bookId}/chapters/${chapterId}`, {
+        pageIndex: chapterData.pageIndex,
+        title: chapterData.title,
+        content: chapterData.content
+      }, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      // Check if response is already ApiResponse format
+      if (response.data && typeof response.data === 'object' && 'isSuccess' in response.data) {
+        return response.data;
+      }
+      
+      // If response is a direct Chapter object
+      if (response.data && response.data.chapterId) {
+        return {
+          value: response.data,
+          isSuccess: true,
+          isFailure: false
+        };
+      }
+      
+      // If response has a value property
+      if (response.data && response.data.value) {
+        return {
+          value: response.data.value,
+          isSuccess: true,
+          isFailure: false
+        };
+      }
+      
+      throw new Error('Invalid response format');
+    } catch (error: any) {
+      if (error.response) {
+        return {
+          value: {} as Chapter,
+          isSuccess: false,
+          isFailure: true,
+          error: {
+            code: error.response.status?.toString() || 'UNKNOWN',
+            description: error.response.data?.error?.description || error.response.data?.message || 'Không thể cập nhật chương'
+          }
+        };
+      } else if (error.request) {
+        throw new Error('Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.');
+      } else {
+        throw error;
+      }
+    }
+  },
+
+  // Delete chapter
+  deleteChapter: async (bookId: string, chapterId: string): Promise<ApiResponse<any>> => {
+    try {
+      const response = await api.delete<any>(`/Book/${bookId}/chapters/${chapterId}`);
+      
+      // Check if response is already ApiResponse format
+      if (response.data && typeof response.data === 'object' && 'isSuccess' in response.data) {
+        return response.data;
+      }
+      
+      // If no response data, assume success
+      return {
+        value: {},
+        isSuccess: true,
+        isFailure: false
+      };
+    } catch (error: any) {
+      if (error.response) {
+        return {
+          value: {},
+          isSuccess: false,
+          isFailure: true,
+          error: {
+            code: error.response.status?.toString() || 'UNKNOWN',
+            description: error.response.data?.error?.description || error.response.data?.message || 'Không thể xóa chương'
+          }
+        };
+      } else if (error.request) {
+        throw new Error('Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.');
+      } else {
+        throw error;
+      }
+    }
+  }
+};
+
+// Category management services
+export const categoryService = {
+  // Get all categories
+  getAllCategories: async (): Promise<ApiResponse<Category[]>> => {
+    try {
+      const response = await api.get<any>('/Book/Categories');
+
+      // Check if response is a direct array (API returns [...])
+      if (Array.isArray(response.data)) {
+        return {
+          value: response.data,
+          isSuccess: true,
+          isFailure: false
+        };
+      }
+
+      // If response is already ApiResponse format, return as is
+      if (response.data && typeof response.data === 'object' && 'isSuccess' in response.data) {
+        return response.data;
+      }
+
+      // If response has a value property
+      if (response.data && response.data.value && Array.isArray(response.data.value)) {
+        return {
+          value: response.data.value,
+          isSuccess: true,
+          isFailure: false
+        };
+      }
+
+      // Fallback: empty categories array
+      return {
+        value: [],
+        isSuccess: true,
+        isFailure: false
+      };
+    } catch (error: any) {
+      console.error('Error in getAllCategories:', error);
+      if (error.response) {
+        return {
+          value: [],
+          isSuccess: false,
+          isFailure: true,
+          error: {
+            code: error.response.status?.toString() || 'UNKNOWN',
+            description: error.response.data?.error?.description || error.response.data?.message || 'Không thể tải danh sách thể loại'
+          }
+        };
+      } else if (error.request) {
+        throw new Error('Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.');
+      } else {
+        throw error;
+      }
+    }
+  }
+};
+
 // Storage utilities
 export const storageService = {
   // Save auth data to localStorage
   saveAuthData: (loginResponse: LoginResponse) => {
+    console.log('Saving auth data to localStorage');
+    console.log('Access token:', loginResponse.value.accessToken ? loginResponse.value.accessToken.substring(0, 20) + '...' : 'null');
     localStorage.setItem('token', loginResponse.value.accessToken);
     localStorage.setItem('refreshToken', loginResponse.value.refreshToken);
     localStorage.setItem('user', JSON.stringify(loginResponse.value.user));
     localStorage.setItem('expiresAt', loginResponse.value.expiresAt);
+    console.log('Token saved to localStorage:', !!localStorage.getItem('token'));
+    console.log('Token value in localStorage:', localStorage.getItem('token') ? localStorage.getItem('token')?.substring(0, 20) + '...' : 'null');
   },
 
   // Get auth data from localStorage
@@ -78,6 +805,11 @@ export const storageService = {
     const refreshToken = localStorage.getItem('refreshToken');
     const userStr = localStorage.getItem('user');
     const expiresAt = localStorage.getItem('expiresAt');
+    
+    console.log('Getting auth data from localStorage');
+    console.log('Token exists:', !!token);
+    console.log('Token value:', token ? token.substring(0, 20) + '...' : 'null');
+    console.log('All localStorage keys:', Object.keys(localStorage));
     
     const user = userStr ? JSON.parse(userStr) : null;
     

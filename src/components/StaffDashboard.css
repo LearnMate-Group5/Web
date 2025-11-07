@@ -20,8 +20,56 @@
   padding: 30px;
 }
 
-.dashboard-actions {
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.loading-spinner {
+  font-size: 18px;
+  color: #666;
+}
+
+.error-message {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 12px 20px;
+  border-radius: 6px;
   margin-bottom: 20px;
+  border: 1px solid #f5c6cb;
+}
+
+.dashboard-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 20px;
+}
+
+.actions-left {
+  display: flex;
+  gap: 10px;
+}
+
+.actions-right {
+  display: flex;
+  align-items: center;
+}
+
+.filter-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #555;
+  cursor: pointer;
+}
+
+.filter-checkbox input[type="checkbox"] {
+  cursor: pointer;
 }
 
 .add-book-button {
@@ -74,18 +122,166 @@
 }
 
 .form-group input,
-.form-group select {
+.form-group select,
+.form-group textarea {
   padding: 10px;
   border: 1px solid #ced4da;
   border-radius: 4px;
   font-size: 14px;
+  font-family: inherit;
 }
 
 .form-group input:focus,
-.form-group select:focus {
+.form-group select:focus,
+.form-group textarea:focus {
   outline: none;
   border-color: #80bdff;
   box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.form-group select[multiple] {
+  min-height: 120px;
+}
+
+.form-group small {
+  color: #666;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.form-group small.error-text {
+  color: #dc3545;
+}
+
+/* Category Dropdown Styles */
+.category-dropdown-container {
+  position: relative;
+}
+
+.category-dropdown-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.category-dropdown-button {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  text-align: left;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.category-dropdown-button:hover {
+  border-color: #80bdff;
+}
+
+.category-dropdown-button:focus {
+  outline: none;
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.category-dropdown-button.placeholder {
+  color: #6c757d;
+}
+
+.dropdown-arrow {
+  font-size: 12px;
+  color: #666;
+  margin-left: 8px;
+  transition: transform 0.3s ease;
+}
+
+.category-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  margin-top: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.category-option {
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  gap: 10px;
+}
+
+.category-option:hover {
+  background-color: #f8f9fa;
+}
+
+.category-option input[type="checkbox"] {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+
+.category-option span {
+  flex: 1;
+  font-size: 14px;
+  color: #333;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: normal;
+}
+
+.checkbox-label input[type="checkbox"] {
+  cursor: pointer;
+  width: auto;
+}
+
+.image-preview {
+  margin-top: 10px;
+}
+
+.image-preview img {
+  max-width: 200px;
+  max-height: 200px;
+  border-radius: 4px;
+  border: 1px solid #ced4da;
+  object-fit: cover;
+}
+
+.clear-image-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #dc3545;
+  cursor: pointer;
+}
+
+.clear-image-checkbox input[type="checkbox"] {
+  cursor: pointer;
 }
 
 .form-actions {
@@ -102,6 +298,7 @@
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
+  transition: background-color 0.3s ease;
 }
 
 .submit-button:hover {
@@ -116,6 +313,7 @@
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
+  transition: background-color 0.3s ease;
 }
 
 .cancel-button:hover {
@@ -128,11 +326,13 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   margin-bottom: 25px;
+  overflow-x: auto;
 }
 
 .books-table {
   width: 100%;
   border-collapse: collapse;
+  min-width: 1000px;
 }
 
 .books-table th {
@@ -142,6 +342,7 @@
   font-weight: 600;
   color: #333;
   border-bottom: 2px solid #e9ecef;
+  white-space: nowrap;
 }
 
 .books-table td {
@@ -152,6 +353,53 @@
 
 .books-table tr:hover {
   background: #f8f9fa;
+}
+
+.book-image-thumbnail {
+  width: 60px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid #e9ecef;
+}
+
+.no-image {
+  width: 60px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  font-size: 10px;
+  color: #999;
+  text-align: center;
+  padding: 5px;
+}
+
+.description-cell {
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-badge.active {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-badge.inactive {
+  background: #f8d7da;
+  color: #721c24;
 }
 
 .status-select {
@@ -181,22 +429,32 @@
 
 .actions {
   display: flex;
-  gap: 10px;
+  gap: 8px;
 }
 
+.edit-button,
 .delete-button {
-  background: #dc3545;
-  color: white;
+  background: none;
   border: none;
-  padding: 6px 12px;
-  border-radius: 4px;
+  padding: 8px;
   cursor: pointer;
-  font-size: 12px;
-  transition: background-color 0.3s ease;
+  font-size: 18px;
+  transition: transform 0.2s ease;
+  border-radius: 4px;
+}
+
+.edit-button:hover {
+  background: #e7f3ff;
+  transform: scale(1.1);
 }
 
 .delete-button:hover {
-  background: #c82333;
+  background: #fff5f5;
+  transform: scale(1.1);
+}
+
+.delete-button {
+  color: #dc3545;
 }
 
 .dashboard-stats {
@@ -225,4 +483,223 @@
   font-size: 32px;
   font-weight: 700;
   color: #333;
+}
+
+.manage-chapters-button {
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  font-size: 18px;
+  transition: transform 0.2s ease;
+  border-radius: 4px;
+  color: #17a2b8;
+}
+
+.manage-chapters-button:hover {
+  background: #e7f7f9;
+  transform: scale(1.1);
+}
+
+/* Chapter Management Modal */
+.chapter-management-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.chapter-management-content {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 1200px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.chapter-management-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 25px;
+  border-bottom: 1px solid #e9ecef;
+  background: #f8f9fa;
+}
+
+.chapter-management-header h2 {
+  margin: 0;
+  color: #333;
+  font-size: 20px;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #666;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.close-button:hover {
+  background: #e9ecef;
+  color: #333;
+}
+
+.chapter-management-body {
+  padding: 25px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.chapter-actions {
+  margin-bottom: 20px;
+}
+
+.add-chapter-button {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+}
+
+.add-chapter-button:hover {
+  background: #218838;
+}
+
+.chapter-form {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 25px;
+}
+
+.chapter-form h3 {
+  margin: 0 0 20px 0;
+  color: #333;
+  font-size: 18px;
+}
+
+.chapters-list {
+  margin-top: 25px;
+}
+
+.chapters-list h3 {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 18px;
+}
+
+.no-chapters {
+  text-align: center;
+  padding: 40px;
+  color: #999;
+  font-size: 14px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.chapters-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.chapters-table th {
+  background: #f8f9fa;
+  padding: 12px 15px;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid #e9ecef;
+  white-space: nowrap;
+}
+
+.chapters-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #e9ecef;
+  vertical-align: top;
+}
+
+.chapters-table tr:hover {
+  background: #f8f9fa;
+}
+
+.chapter-content-cell {
+  max-width: 400px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .dashboard-actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .actions-right {
+    width: 100%;
+  }
+
+  .form-row {
+    flex-direction: column;
+  }
+
+  .books-table-container {
+    overflow-x: scroll;
+  }
+
+  .chapter-management-modal {
+    padding: 10px;
+  }
+
+  .chapter-management-content {
+    max-height: 95vh;
+  }
+
+  .chapter-management-body {
+    padding: 15px;
+  }
+
+  .chapters-table {
+    font-size: 12px;
+  }
+
+  .chapters-table th,
+  .chapters-table td {
+    padding: 8px;
+  }
+
+  .chapter-content-cell {
+    max-width: 200px;
+  }
 }

@@ -74,3 +74,78 @@ export interface AuthContextType {
   logout: () => void;
   isLoading: boolean;
 }
+
+// Book types
+export interface Book {
+  bookId: string;
+  title: string;
+  author: string;
+  description: string;
+  imageUrl: string | null;
+  imageBase64: string | null; // Base64 encoded image
+  categories: Category[] | string[];
+  isActive: boolean;
+  views: number;
+  likes: number;
+  createdAt: string;
+  updatedAt: string | null;
+}
+
+export interface Category {
+  categoryId: string;
+  name: string;
+}
+
+export interface BookListResponse {
+  books: Book[];
+  totalCount?: number;
+}
+
+export interface BookListParams {
+  onlyActive?: boolean;
+  categoryId?: string;
+  categoryName?: string;
+}
+
+export interface CreateBookRequest {
+  title: string;
+  author: string;
+  description: string;
+  imageFile: File | null;
+  categories: string[]; // Array of category IDs or names
+}
+
+export interface UpdateBookRequest {
+  title: string;
+  author: string;
+  description: string;
+  imageFile: File | null;
+  categories: string[];
+  isActive: boolean;
+  clearImage: boolean;
+}
+
+// Chapter types
+export interface Chapter {
+  chapterId: string;
+  bookId: string;
+  pageIndex: number;
+  title: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string | null;
+  createdBy: string;
+  updatedBy: string | null;
+}
+
+export interface CreateChapterRequest {
+  pageIndex: number;
+  title: string;
+  content: string;
+}
+
+export interface UpdateChapterRequest {
+  pageIndex: number;
+  title: string;
+  content: string;
+}
