@@ -33,7 +33,7 @@ export interface LoginResponse {
   };
   isSuccess: boolean;
   isFailure: boolean;
-  error: {
+  error?: {
     code: string;
     description: string;
   };
@@ -44,7 +44,7 @@ export interface ApiResponse<T> {
   value: T;
   isSuccess: boolean;
   isFailure: boolean;
-  error: {
+  error?: {
     code: string;
     description: string;
   };

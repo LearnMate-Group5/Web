@@ -19,7 +19,7 @@ const AdminDashboard: React.FC = () => {
       if (response.isSuccess) {
         setUsers(response.value.users);
       } else {
-        setError(response.error.description || 'Không thể tải danh sách người dùng');
+        setError(response.error?.description || 'Không thể tải danh sách người dùng');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Lỗi khi tải dữ liệu');
@@ -44,7 +44,7 @@ const AdminDashboard: React.FC = () => {
           )
         );
       } else {
-        setError(response.error.description || 'Không thể cập nhật trạng thái');
+        setError(response.error?.description || 'Không thể cập nhật trạng thái');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Lỗi khi cập nhật trạng thái');
@@ -59,7 +59,7 @@ const AdminDashboard: React.FC = () => {
         // Refresh user list to get updated data
         fetchUsers();
       } else {
-        setError(response.error.description || 'Không thể cập nhật vai trò');
+        setError(response.error?.description || 'Không thể cập nhật vai trò');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Lỗi khi cập nhật vai trò');

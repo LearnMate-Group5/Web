@@ -1,11 +1,8 @@
 import api from './axios';
-import { 
-  LoginRequest, 
+import type { 
   LoginResponse, 
   ApiResponse, 
-  UserListResponse, 
-  RoleUpdateRequest, 
-  ActivationRequest,
+  UserListResponse,
   Book,
   BookListResponse,
   BookListParams,
@@ -91,7 +88,7 @@ export const bookService = {
           value: { books: response.data } as BookListResponse,
           isSuccess: true,
           isFailure: false
-        };
+        } as ApiResponse<BookListResponse>;
       }
       
       // If response is already ApiResponse format, return as is
@@ -107,14 +104,14 @@ export const bookService = {
             value: { books: value } as BookListResponse,
             isSuccess: true,
             isFailure: false
-          };
+          } as ApiResponse<BookListResponse>;
         }
         if (value && typeof value === 'object' && 'books' in value) {
           return {
             value: value as BookListResponse,
             isSuccess: true,
             isFailure: false
-          };
+          } as ApiResponse<BookListResponse>;
         }
       }
       
@@ -123,7 +120,7 @@ export const bookService = {
         value: { books: [] } as BookListResponse,
         isSuccess: true,
         isFailure: false
-      };
+      } as ApiResponse<BookListResponse>;
     } catch (error: any) {
       // Handle axios errors
       if (error.response) {
@@ -197,7 +194,7 @@ export const bookService = {
           value: response.data,
           isSuccess: true,
           isFailure: false
-        };
+        } as ApiResponse<Book>;
       }
       
       // If response has a value property
@@ -206,7 +203,7 @@ export const bookService = {
           value: response.data.value,
           isSuccess: true,
           isFailure: false
-        };
+        } as ApiResponse<Book>;
       }
       
       // Default: success if status is 200/201
@@ -215,7 +212,7 @@ export const bookService = {
           value: response.data || {} as Book,
           isSuccess: true,
           isFailure: false
-        };
+        } as ApiResponse<Book>;
       }
       
       throw new Error('Invalid response format');
@@ -312,7 +309,7 @@ export const bookService = {
           value: response.data,
           isSuccess: true,
           isFailure: false
-        };
+        } as ApiResponse<Book>;
       }
       
       // If response has a value property
@@ -321,7 +318,7 @@ export const bookService = {
           value: response.data.value,
           isSuccess: true,
           isFailure: false
-        };
+        } as ApiResponse<Book>;
       }
       
       // Default: success if status is 200
@@ -330,7 +327,7 @@ export const bookService = {
           value: response.data || {} as Book,
           isSuccess: true,
           isFailure: false
-        };
+        } as ApiResponse<Book>;
       }
       
       throw new Error('Invalid response format');
@@ -400,7 +397,7 @@ export const bookService = {
             value: {},
             isSuccess: true,
             isFailure: false
-          };
+          } as ApiResponse<any>;
         }
         
         // If response has a value property
@@ -409,7 +406,7 @@ export const bookService = {
             value: response.data.value,
             isSuccess: true,
             isFailure: false
-          };
+          } as ApiResponse<any>;
         }
         
         // Default: success if status is 200/204
@@ -417,7 +414,7 @@ export const bookService = {
           value: {},
           isSuccess: true,
           isFailure: false
-        };
+        } as ApiResponse<any>;
       }
       
       // If status is not 200/204, treat as error
@@ -442,7 +439,7 @@ export const bookService = {
             value: {},
             isSuccess: true,
             isFailure: false
-          };
+          } as ApiResponse<any>;
         }
         
         return {
@@ -482,7 +479,7 @@ export const chapterService = {
           value: response.data,
           isSuccess: true,
           isFailure: false
-        };
+        } as ApiResponse<Chapter[]>;
       }
       
       // If response is already ApiResponse format, return as is
@@ -500,7 +497,7 @@ export const chapterService = {
             value: value,
             isSuccess: true,
             isFailure: false
-          };
+          } as ApiResponse<Chapter[]>;
         }
       }
       
@@ -510,7 +507,7 @@ export const chapterService = {
         value: [],
         isSuccess: true,
         isFailure: false
-      };
+      } as ApiResponse<Chapter[]>;
     } catch (error: any) {
       console.error('Error in getChaptersByBookId:', error);
       if (error.response) {
@@ -548,7 +545,7 @@ export const chapterService = {
           value: response.data,
           isSuccess: true,
           isFailure: false
-        };
+        } as ApiResponse<Chapter>;
       }
       
       // If response has a value property
@@ -557,7 +554,7 @@ export const chapterService = {
           value: response.data.value,
           isSuccess: true,
           isFailure: false
-        };
+        } as ApiResponse<Chapter>;
       }
       
       throw new Error('Invalid response format');
@@ -604,7 +601,7 @@ export const chapterService = {
           value: response.data,
           isSuccess: true,
           isFailure: false
-        };
+        } as ApiResponse<Chapter>;
       }
       
       // If response has a value property
@@ -613,7 +610,7 @@ export const chapterService = {
           value: response.data.value,
           isSuccess: true,
           isFailure: false
-        };
+        } as ApiResponse<Chapter>;
       }
       
       throw new Error('Invalid response format');
@@ -660,7 +657,7 @@ export const chapterService = {
           value: response.data,
           isSuccess: true,
           isFailure: false
-        };
+        } as ApiResponse<Chapter>;
       }
       
       // If response has a value property
@@ -669,7 +666,7 @@ export const chapterService = {
           value: response.data.value,
           isSuccess: true,
           isFailure: false
-        };
+        } as ApiResponse<Chapter>;
       }
       
       throw new Error('Invalid response format');
@@ -707,7 +704,7 @@ export const chapterService = {
         value: {},
         isSuccess: true,
         isFailure: false
-      };
+      } as ApiResponse<any>;
     } catch (error: any) {
       if (error.response) {
         return {
@@ -741,7 +738,7 @@ export const categoryService = {
           value: response.data,
           isSuccess: true,
           isFailure: false
-        };
+        } as ApiResponse<Category[]>;
       }
 
       // If response is already ApiResponse format, return as is
@@ -755,7 +752,7 @@ export const categoryService = {
           value: response.data.value,
           isSuccess: true,
           isFailure: false
-        };
+        } as ApiResponse<Category[]>;
       }
 
       // Fallback: empty categories array
@@ -763,7 +760,7 @@ export const categoryService = {
         value: [],
         isSuccess: true,
         isFailure: false
-      };
+      } as ApiResponse<Category[]>;
     } catch (error: any) {
       console.error('Error in getAllCategories:', error);
       if (error.response) {
