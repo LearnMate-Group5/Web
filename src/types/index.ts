@@ -8,6 +8,7 @@ export interface User {
   avatarUrl: string | null;
   isPremium: boolean | null;
   providerName: string | null;
+  role: string | null;
   createdAt: string;
   updatedAt: string | null;
 }

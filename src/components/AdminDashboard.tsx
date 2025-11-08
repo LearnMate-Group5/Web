@@ -98,6 +98,7 @@ const AdminDashboard: React.FC = () => {
               <tr>
                 <th>Tên</th>
                 <th>Email</th>
+                <th>Vai trò</th>
                 <th>Trạng thái</th>
                 <th>Xác thực</th>
                 <th>Ngày tạo</th>
@@ -109,6 +110,11 @@ const AdminDashboard: React.FC = () => {
                 <tr key={user.userId}>
                   <td>{user.name}</td>
                   <td>{user.email}</td>
+                  <td>
+                    <span className="role-badge">
+                      {user.role || 'Chưa có vai trò'}
+                    </span>
+                  </td>
                   <td>
                     <span className={`status-badge ${user.isActive ? 'active' : 'inactive'}`}>
                       {user.isActive ? 'Hoạt động' : 'Không hoạt động'}
@@ -130,12 +136,13 @@ const AdminDashboard: React.FC = () => {
                     <select
                       onChange={(e) => handleRoleChange(user.userId, e.target.value)}
                       className="role-select"
-                      defaultValue=""
+                      value={user.role || ''}
                       title="Chọn vai trò cho người dùng"
                     >
                       <option value="" disabled>Chọn vai trò</option>
                       <option value="Admin">Admin</option>
                       <option value="Staff">Staff</option>
+                      <option value="User">User</option>
                     </select>
                   </td>
                 </tr>
