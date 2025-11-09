@@ -3,7 +3,6 @@ import type { ErrorInfo, ReactNode } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Login from './components/Login';
-import AdminDashboard from './components/AdminDashboard';
 import UserManagementDashboard from './components/UserManagementDashboard';
 import StaffManagementDashboard from './components/StaffManagementDashboard';
 import StaffDashboard from './components/StaffDashboard';
@@ -35,10 +34,17 @@ class ErrorBoundary extends React.Component<{ children: ReactNode }, ErrorBounda
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{ padding: '20px', textAlign: 'center' }}>
-          <h2>Đã xảy ra lỗi</h2>
-          <p>{this.state.error?.message || 'Có lỗi xảy ra trong ứng dụng'}</p>
-          <button onClick={() => window.location.reload()}>Tải lại trang</button>
+        <div className="flex items-center justify-center min-h-screen p-4">
+          <div className="text-center space-y-4 max-w-md">
+            <h2 className="text-2xl font-bold text-destructive">Đã xảy ra lỗi</h2>
+            <p className="text-muted-foreground">{this.state.error?.message || 'Có lỗi xảy ra trong ứng dụng'}</p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+            >
+              Tải lại trang
+            </button>
+          </div>
         </div>
       );
     }
@@ -54,8 +60,11 @@ const AppContent: React.FC = () => {
     // Show loading state while auth is being checked
     if (isLoading) {
       return (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
-          <div>Đang tải...</div>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="flex flex-col items-center gap-4">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+            <p className="text-muted-foreground">Đang tải...</p>
+          </div>
         </div>
       );
     }
@@ -133,10 +142,17 @@ const AppContent: React.FC = () => {
   } catch (error) {
     console.error('Error in AppContent:', error);
     return (
-      <div style={{ padding: '20px', textAlign: 'center' }}>
-        <h2>Lỗi xác thực</h2>
-        <p>Vui lòng đăng nhập lại.</p>
-        <button onClick={() => window.location.href = '/login'}>Đăng nhập</button>
+      <div className="flex items-center justify-center min-h-screen p-4">
+        <div className="text-center space-y-4 max-w-md">
+          <h2 className="text-2xl font-bold text-destructive">Lỗi xác thực</h2>
+          <p className="text-muted-foreground">Vui lòng đăng nhập lại.</p>
+          <button 
+            onClick={() => window.location.href = '/login'}
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+          >
+            Đăng nhập
+          </button>
+        </div>
       </div>
     );
   }

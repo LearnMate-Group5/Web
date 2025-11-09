@@ -1,7 +1,9 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import './Layout.css';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { Users, UserCog, BookOpen, LogOut, User } from 'lucide-react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -19,26 +21,41 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const isStaff = user?.roles.includes('Staff');
 
   return (
-    <div className="layout">
-      <nav className="sidebar">
-        <div className="sidebar-header">
-          <h2>LearnMate</h2>
+    <div className="min-h-screen flex bg-background">
+      {/* Sidebar */}
+      <aside className="w-64 border-r bg-card flex flex-col fixed h-screen">
+        {/* Header */}
+        <div className="p-6 border-b bg-gradient-to-r from-primary to-primary/80">
+          <h2 className="text-xl font-bold text-primary-foreground">LearnMate</h2>
         </div>
         
-        <div className="sidebar-menu">
+        {/* Navigation */}
+        <nav className="flex-1 p-4 space-y-2">
           {isAdmin && (
             <>
               <Link 
                 to="/admin/users" 
-                className={`menu-item ${location.pathname === '/admin/users' ? 'active' : ''}`}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                  location.pathname === '/admin/users' 
+                    ? "bg-primary text-primary-foreground" 
+                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                )}
               >
-                👥 Quản lý người dùng
+                <Users className="h-4 w-4" />
+                Quản lý người dùng
               </Link>
               <Link 
                 to="/admin/staff" 
-                className={`menu-item ${location.pathname === '/admin/staff' ? 'active' : ''}`}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                  location.pathname === '/admin/staff' 
+                    ? "bg-primary text-primary-foreground" 
+                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                )}
               >
-                👔 Quản lý nhân viên
+                <UserCog className="h-4 w-4" />
+                Quản lý nhân viên
               </Link>
             </>
           )}
@@ -46,26 +63,43 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           {isStaff && (
             <Link 
               to="/staff" 
-              className={`menu-item ${location.pathname === '/staff' ? 'active' : ''}`}
+              className={cn(
+                "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                location.pathname === '/staff' 
+                  ? "bg-primary text-primary-foreground" 
+                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+              )}
             >
-              📚 Quản lý sách
+              <BookOpen className="h-4 w-4" />
+              Quản lý sách
             </Link>
           )}
-        </div>
+        </nav>
 
-        <div className="sidebar-footer">
-          <div className="user-info">
-            <p className="user-name">{user?.name}</p>
-            <p className="user-email">{user?.email}</p>
-            <p className="user-role">{user?.roles.join(', ')}</p>
+        {/* Footer */}
+        <div className="p-4 border-t space-y-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <User className="h-4 w-4 text-muted-foreground" />
+              <p className="text-sm font-semibold">{user?.name}</p>
+            </div>
+            <p className="text-xs text-muted-foreground ml-6">{user?.email}</p>
+            <p className="text-xs text-primary ml-6 font-medium uppercase">{user?.roles.join(', ')}</p>
           </div>
-          <button onClick={handleLogout} className="logout-btn">
-            🚪 Đăng xuất
-          </button>
+          <Button 
+            onClick={handleLogout} 
+            variant="destructive" 
+            className="w-full"
+            size="sm"
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            Đăng xuất
+          </Button>
         </div>
-      </nav>
+      </aside>
 
-      <main className="main-content">
+      {/* Main Content */}
+      <main className="flex-1 ml-64">
         {children}
       </main>
     </div>
