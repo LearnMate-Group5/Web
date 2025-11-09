@@ -27,12 +27,20 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         
         <div className="sidebar-menu">
           {isAdmin && (
-            <Link 
-              to="/admin" 
-              className={`menu-item ${location.pathname === '/admin' ? 'active' : ''}`}
-            >
-              👥 Quản lý người dùng
-            </Link>
+            <>
+              <Link 
+                to="/admin/users" 
+                className={`menu-item ${location.pathname === '/admin/users' ? 'active' : ''}`}
+              >
+                👥 Quản lý người dùng
+              </Link>
+              <Link 
+                to="/admin/staff" 
+                className={`menu-item ${location.pathname === '/admin/staff' ? 'active' : ''}`}
+              >
+                👔 Quản lý nhân viên
+              </Link>
+            </>
           )}
           
           {isStaff && (

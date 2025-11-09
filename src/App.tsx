@@ -4,6 +4,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Login from './components/Login';
 import AdminDashboard from './components/AdminDashboard';
+import UserManagementDashboard from './components/UserManagementDashboard';
+import StaffManagementDashboard from './components/StaffManagementDashboard';
 import StaffDashboard from './components/StaffDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import NotFound from './components/NotFound';
@@ -65,7 +67,7 @@ const AppContent: React.FC = () => {
           path="/login" 
           element={
             isAuthenticated ? (
-              <Navigate to={user?.roles.includes('Admin') ? '/admin' : '/staff'} replace />
+              <Navigate to={user?.roles.includes('Admin') ? '/admin/users' : '/staff'} replace />
             ) : (
               <Login />
             )
@@ -74,12 +76,33 @@ const AppContent: React.FC = () => {
         
         {/* Protected routes */}
         <Route 
-          path="/admin" 
+          path="/admin/users" 
           element={
             <ProtectedRoute requiredRole="Admin">
               <Layout>
-                <AdminDashboard />
+                <UserManagementDashboard />
               </Layout>
+            </ProtectedRoute>
+          } 
+        />
+        
+        <Route 
+          path="/admin/staff" 
+          element={
+            <ProtectedRoute requiredRole="Admin">
+              <Layout>
+                <StaffManagementDashboard />
+              </Layout>
+            </ProtectedRoute>
+          } 
+        />
+        
+        {/* Legacy admin route - redirect to users */}
+        <Route 
+          path="/admin" 
+          element={
+            <ProtectedRoute requiredRole="Admin">
+              <Navigate to="/admin/users" replace />
             </ProtectedRoute>
           } 
         />
@@ -99,7 +122,7 @@ const AppContent: React.FC = () => {
         <Route 
           path="/" 
           element={
-            <Navigate to={isAuthenticated ? (user?.roles.includes('Admin') ? '/admin' : '/staff') : '/login'} replace />
+            <Navigate to={isAuthenticated ? (user?.roles.includes('Admin') ? '/admin/users' : '/staff') : '/login'} replace />
           } 
         />
         

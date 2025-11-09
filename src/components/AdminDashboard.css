@@ -188,3 +188,137 @@
   font-size: 14px;
   color: #666;
 }
+
+/* Search and Filter Section */
+.search-filter-section {
+  background: white;
+  padding: 20px 30px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.search-box {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 10px 15px 10px 40px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.3s ease;
+}
+
+.search-box input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  font-size: 16px;
+  pointer-events: none;
+  color: #666;
+}
+
+/* Sortable Headers */
+.sortable-header {
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  padding-right: 25px;
+  transition: background-color 0.2s ease;
+}
+
+.sortable-header:hover {
+  background-color: #e9ecef;
+}
+
+.sort-icon {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  color: #667eea;
+  opacity: 0.5;
+}
+
+.sortable-header.active .sort-icon {
+  opacity: 1;
+}
+
+.sortable-header.desc .sort-icon::after {
+  content: ' ↓';
+}
+
+.sortable-header.asc .sort-icon::after {
+  content: ' ↑';
+}
+
+.sortable-header:not(.active):not(.desc):not(.asc) .sort-icon::after {
+  content: ' ↕';
+}
+
+/* Improved Pagination */
+.pagination-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding: 15px 0;
+}
+
+.pagination-info {
+  font-size: 14px;
+  color: #666;
+}
+
+.pagination-buttons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.page-number-button {
+  padding: 6px 12px;
+  border: 1px solid #ced4da;
+  background: white;
+  border-radius: 4px;
+  color: #333;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  min-width: 40px;
+}
+
+.page-number-button:hover:not(:disabled):not(.active) {
+  background: #e9ecef;
+}
+
+.page-number-button.active {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+}
+
+.page-number-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #666;
+}
