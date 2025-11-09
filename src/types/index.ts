@@ -150,3 +150,13 @@ export interface UpdateChapterRequest {
   title: string;
   content: string;
 }
+
+// Subscription types
+export interface SubscriptionPlan {
+  subscriptionId: string;
+  name: string;
+  type: string;
+  status: string;
+  originalPrice: number;
+  discount: number;
+}

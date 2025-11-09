@@ -11,7 +11,8 @@ import type {
   Chapter,
   CreateChapterRequest,
   UpdateChapterRequest,
-  Category
+  Category,
+  SubscriptionPlan
 } from '../types';
 
 // Auth services
@@ -771,6 +772,65 @@ export const categoryService = {
           error: {
             code: error.response.status?.toString() || 'UNKNOWN',
             description: error.response.data?.error?.description || error.response.data?.message || 'Không thể tải danh sách thể loại'
+          }
+        };
+      } else if (error.request) {
+        throw new Error('Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.');
+      } else {
+        throw error;
+      }
+    }
+  }
+};
+
+// Subscription services
+export const subscriptionService = {
+  // Get all subscription plans
+  getPlans: async (): Promise<ApiResponse<SubscriptionPlan[]>> => {
+    try {
+      console.log('Fetching subscription plans from /Subscription/plans');
+      const response = await api.get<any>('/Subscription/plans');
+      console.log('Subscription plans response:', response);
+      
+      // Check if response is a direct array (API returns [...])
+      if (Array.isArray(response.data)) {
+        return {
+          value: response.data,
+          isSuccess: true,
+          isFailure: false
+        } as ApiResponse<SubscriptionPlan[]>;
+      }
+      
+      // If response is already ApiResponse format, return as is
+      if (response.data && typeof response.data === 'object' && 'isSuccess' in response.data) {
+        return response.data;
+      }
+      
+      // If response has a value property
+      if (response.data && response.data.value && Array.isArray(response.data.value)) {
+        return {
+          value: response.data.value,
+          isSuccess: true,
+          isFailure: false
+        } as ApiResponse<SubscriptionPlan[]>;
+      }
+      
+      // Fallback: empty plans array
+      return {
+        value: [],
+        isSuccess: true,
+        isFailure: false
+      } as ApiResponse<SubscriptionPlan[]>;
+    } catch (error: any) {
+      console.error('Error in getPlans:', error);
+      if (error.response) {
+        return {
+          value: [],
+          isSuccess: false,
+          isFailure: true,
+          error: {
+            code: error.response.status?.toString() || 'UNKNOWN',
+            description: error.response.data?.error?.description || error.response.data?.message || 'Không thể tải danh sách gói đăng ký'
           }
         };
       } else if (error.request) {

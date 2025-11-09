@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { Users, UserCog, BookOpen, LogOut, User } from 'lucide-react';
+import { Users, UserCog, BookOpen, LogOut, User, CreditCard } from 'lucide-react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -56,6 +56,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               >
                 <UserCog className="h-4 w-4" />
                 Quản lý nhân viên
+              </Link>
+              <Link 
+                to="/admin/subscriptions" 
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                  location.pathname === '/admin/subscriptions' 
+                    ? "bg-primary text-primary-foreground" 
+                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                )}
+              >
+                <CreditCard className="h-4 w-4" />
+                Gói đăng ký
               </Link>
             </>
           )}

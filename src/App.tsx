@@ -6,6 +6,7 @@ import Login from './components/Login';
 import UserManagementDashboard from './components/UserManagementDashboard';
 import StaffManagementDashboard from './components/StaffManagementDashboard';
 import StaffDashboard from './components/StaffDashboard';
+import SubscriptionPlansDashboard from './components/SubscriptionPlansDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import NotFound from './components/NotFound';
 import Layout from './components/Layout';
@@ -101,6 +102,17 @@ const AppContent: React.FC = () => {
             <ProtectedRoute requiredRole="Admin">
               <Layout>
                 <StaffManagementDashboard />
+              </Layout>
+            </ProtectedRoute>
+          } 
+        />
+        
+        <Route 
+          path="/admin/subscriptions" 
+          element={
+            <ProtectedRoute requiredRole="Admin">
+              <Layout>
+                <SubscriptionPlansDashboard />
               </Layout>
             </ProtectedRoute>
           } 

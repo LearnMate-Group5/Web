@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { userService } from '../services/api';
-import { type User } from '../types';
+import { userService, subscriptionService } from '../services/api';
+import { type User, type SubscriptionPlan } from '../types';
 import './AdminDashboard.css';
 
 const AdminDashboard: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
+  const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [loading, setLoading] = useState(true);
+  const [plansLoading, setPlansLoading] = useState(true);
   const [error, setError] = useState('');
+  const [plansError, setPlansError] = useState('');
   const [pageNumber, setPageNumber] = useState(1);
   const [pageSize] = useState(8);
 
@@ -28,9 +31,31 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
+  const fetchPlans = async () => {
+    try {
+      setPlansLoading(true);
+      setPlansError('');
+      const response = await subscriptionService.getPlans();
+      
+      if (response.isSuccess) {
+        setPlans(response.value);
+      } else {
+        setPlansError(response.error?.description || 'Không thể tải danh sách gói đăng ký');
+      }
+    } catch (err) {
+      setPlansError(err instanceof Error ? err.message : 'Lỗi khi tải dữ liệu');
+    } finally {
+      setPlansLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchUsers();
   }, [pageNumber]);
+
+  useEffect(() => {
+    fetchPlans();
+  }, []);
 
   const handleToggleActivation = async (userId: string, currentStatus: boolean) => {
     try {
@@ -71,13 +96,16 @@ const AdminDashboard: React.FC = () => {
     return new Date(dateString).toLocaleDateString('vi-VN');
   };
 
-  if (loading) {
-    return (
-      <div className="admin-dashboard">
-        <div className="loading">Đang tải...</div>
-      </div>
-    );
-  }
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND'
+    }).format(price);
+  };
+
+  const calculateFinalPrice = (originalPrice: number, discount: number) => {
+    return originalPrice * (1 - discount / 100);
+  };
 
   return (
     <div className="admin-dashboard">
@@ -92,8 +120,70 @@ const AdminDashboard: React.FC = () => {
       )}
 
       <div className="dashboard-content">
-        <div className="table-container">
-          <table className="users-table">
+        {/* Subscription Plans Section */}
+        <div className="table-container" style={{ marginBottom: '30px' }}>
+          <h2 style={{ padding: '20px', margin: 0, borderBottom: '2px solid #e9ecef' }}>Gói đăng ký</h2>
+          {plansError && (
+            <div className="error-message" style={{ margin: '15px 20px' }}>
+              {plansError}
+            </div>
+          )}
+          {plansLoading ? (
+            <div className="loading">Đang tải gói đăng ký...</div>
+          ) : (
+            <table className="users-table">
+              <thead>
+                <tr>
+                  <th>Tên gói</th>
+                  <th>Loại</th>
+                  <th>Trạng thái</th>
+                  <th>Giá gốc</th>
+                  <th>Giảm giá</th>
+                  <th>Giá cuối</th>
+                </tr>
+              </thead>
+              <tbody>
+                {plans.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} style={{ textAlign: 'center', padding: '40px' }}>
+                      Không có gói đăng ký nào
+                    </td>
+                  </tr>
+                ) : (
+                  plans.map((plan) => (
+                    <tr key={plan.subscriptionId}>
+                      <td>{plan.name}</td>
+                      <td>
+                        <span className="role-badge">
+                          {plan.type}
+                        </span>
+                      </td>
+                      <td>
+                        <span className={`status-badge ${plan.status === 'active' ? 'active' : 'inactive'}`}>
+                          {plan.status === 'active' ? 'Hoạt động' : 'Không hoạt động'}
+                        </span>
+                      </td>
+                      <td>{formatPrice(plan.originalPrice)}</td>
+                      <td>{plan.discount}%</td>
+                      <td style={{ fontWeight: '600', color: '#28a745' }}>
+                        {formatPrice(calculateFinalPrice(plan.originalPrice, plan.discount))}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          )}
+        </div>
+
+        {/* Users Section */}
+        {loading ? (
+          <div className="table-container">
+            <div className="loading">Đang tải danh sách người dùng...</div>
+          </div>
+        ) : (
+          <div className="table-container">
+            <table className="users-table">
             <thead>
               <tr>
                 <th>Tên</th>
@@ -149,9 +239,11 @@ const AdminDashboard: React.FC = () => {
               ))}
             </tbody>
           </table>
-        </div>
+          </div>
+        )}
 
-        <div className="pagination">
+        {!loading && (
+          <div className="pagination">
           <button 
             onClick={() => setPageNumber(prev => Math.max(1, prev - 1))}
             disabled={pageNumber === 1}
@@ -167,7 +259,8 @@ const AdminDashboard: React.FC = () => {
           >
             Sau
           </button>
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
