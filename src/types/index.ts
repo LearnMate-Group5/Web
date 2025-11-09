@@ -160,3 +160,19 @@ export interface SubscriptionPlan {
   originalPrice: number;
   discount: number;
 }
+
+export interface CreateSubscriptionPlanRequest {
+  name: string;
+  type: string;
+  status: string;
+  originalPrice: number;
+  discount: number;
+}
+
+export interface UpdateSubscriptionPlanRequest {
+  name: string;
+  type: string;
+  status: string;
+  originalPrice: number;
+  discount: number;
+}

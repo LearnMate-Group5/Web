@@ -1,6 +1,6 @@
 import axios, { type InternalAxiosRequestConfig } from "axios";
 
-const BASE_URL = "https://d1zhm38r14641p.cloudfront.net"; //http://chooy-alb-1334393243.us-east-1.elb.amazonaws.com
+const BASE_URL = "https://d33b7s7toeeb59.cloudfront.net"; //http://chooy-alb-1334393243.us-east-1.elb.amazonaws.com
 // Instance cho API
 const api = axios.create({
   baseURL: BASE_URL+"/api",

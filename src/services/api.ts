@@ -12,7 +12,9 @@ import type {
   CreateChapterRequest,
   UpdateChapterRequest,
   Category,
-  SubscriptionPlan
+  SubscriptionPlan,
+  CreateSubscriptionPlanRequest,
+  UpdateSubscriptionPlanRequest
 } from '../types';
 
 // Auth services
@@ -831,6 +833,301 @@ export const subscriptionService = {
           error: {
             code: error.response.status?.toString() || 'UNKNOWN',
             description: error.response.data?.error?.description || error.response.data?.message || 'Không thể tải danh sách gói đăng ký'
+          }
+        };
+      } else if (error.request) {
+        throw new Error('Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.');
+      } else {
+        throw error;
+      }
+    }
+  },
+
+  // Get subscription plan by ID
+  getPlanById: async (subscriptionId: string): Promise<ApiResponse<SubscriptionPlan>> => {
+    try {
+      console.log('Fetching subscription plan by ID:', subscriptionId);
+      const response = await api.get<any>(`/Subscription/plans/${subscriptionId}`);
+      console.log('Subscription plan response:', response);
+      
+      // Check if response is already ApiResponse format
+      if (response.data && typeof response.data === 'object' && 'isSuccess' in response.data) {
+        return response.data;
+      }
+      
+      // If response is a direct SubscriptionPlan object
+      if (response.data && response.data.subscriptionId) {
+        return {
+          value: response.data,
+          isSuccess: true,
+          isFailure: false
+        } as ApiResponse<SubscriptionPlan>;
+      }
+      
+      // If response has a value property
+      if (response.data && response.data.value) {
+        return {
+          value: response.data.value,
+          isSuccess: true,
+          isFailure: false
+        } as ApiResponse<SubscriptionPlan>;
+      }
+      
+      // Fallback: empty plan object
+      return {
+        value: {} as SubscriptionPlan,
+        isSuccess: true,
+        isFailure: false
+      } as ApiResponse<SubscriptionPlan>;
+    } catch (error: any) {
+      console.error('Error in getPlanById:', error);
+      if (error.response) {
+        return {
+          value: {} as SubscriptionPlan,
+          isSuccess: false,
+          isFailure: true,
+          error: {
+            code: error.response.status?.toString() || 'UNKNOWN',
+            description: error.response.data?.error?.description || error.response.data?.message || 'Không thể tải thông tin gói đăng ký'
+          }
+        };
+      } else if (error.request) {
+        throw new Error('Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.');
+      } else {
+        throw error;
+      }
+    }
+  },
+
+  // Create new subscription plan
+  createPlan: async (planData: CreateSubscriptionPlanRequest): Promise<ApiResponse<SubscriptionPlan>> => {
+    try {
+      console.log('Creating subscription plan:', planData);
+      const response = await api.post<any>('/Subscription/plans', {
+        name: planData.name,
+        type: planData.type,
+        status: planData.status,
+        originalPrice: planData.originalPrice,
+        discount: planData.discount
+      }, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      console.log('Create subscription plan response:', response);
+      
+      // Check if response is already ApiResponse format
+      if (response.data && typeof response.data === 'object' && 'isSuccess' in response.data) {
+        return response.data;
+      }
+      
+      // If response is a direct SubscriptionPlan object
+      if (response.data && response.data.subscriptionId) {
+        return {
+          value: response.data,
+          isSuccess: true,
+          isFailure: false
+        } as ApiResponse<SubscriptionPlan>;
+      }
+      
+      // If response has a value property
+      if (response.data && response.data.value) {
+        return {
+          value: response.data.value,
+          isSuccess: true,
+          isFailure: false
+        } as ApiResponse<SubscriptionPlan>;
+      }
+      
+      // Default: success if status is 200/201
+      if (response.status === 200 || response.status === 201) {
+        return {
+          value: response.data || {} as SubscriptionPlan,
+          isSuccess: true,
+          isFailure: false
+        } as ApiResponse<SubscriptionPlan>;
+      }
+      
+      throw new Error('Invalid response format');
+    } catch (error: any) {
+      console.error('Error in createPlan:', error);
+      if (error.response) {
+        console.error('Error response:', error.response.data);
+        console.error('Error status:', error.response.status);
+        
+        return {
+          value: {} as SubscriptionPlan,
+          isSuccess: false,
+          isFailure: true,
+          error: {
+            code: error.response.status?.toString() || 'UNKNOWN',
+            description: error.response.data?.error?.description 
+              || error.response.data?.message 
+              || error.response.data?.name?.[0] // Validation error
+              || 'Không thể tạo gói đăng ký'
+          }
+        };
+      } else if (error.request) {
+        throw new Error('Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.');
+      } else {
+        throw error;
+      }
+    }
+  },
+
+  // Update subscription plan
+  updatePlan: async (subscriptionId: string, planData: UpdateSubscriptionPlanRequest): Promise<ApiResponse<SubscriptionPlan>> => {
+    try {
+      console.log('Updating subscription plan:', subscriptionId, planData);
+      const response = await api.put<any>(`/Subscription/plans/${subscriptionId}`, {
+        name: planData.name,
+        type: planData.type,
+        status: planData.status,
+        originalPrice: planData.originalPrice,
+        discount: planData.discount
+      }, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      console.log('Update subscription plan response:', response);
+      
+      // Check if response is already ApiResponse format
+      if (response.data && typeof response.data === 'object' && 'isSuccess' in response.data) {
+        return response.data;
+      }
+      
+      // If response is a direct SubscriptionPlan object
+      if (response.data && response.data.subscriptionId) {
+        return {
+          value: response.data,
+          isSuccess: true,
+          isFailure: false
+        } as ApiResponse<SubscriptionPlan>;
+      }
+      
+      // If response has a value property
+      if (response.data && response.data.value) {
+        return {
+          value: response.data.value,
+          isSuccess: true,
+          isFailure: false
+        } as ApiResponse<SubscriptionPlan>;
+      }
+      
+      // Default: success if status is 200
+      if (response.status === 200) {
+        return {
+          value: response.data || {} as SubscriptionPlan,
+          isSuccess: true,
+          isFailure: false
+        } as ApiResponse<SubscriptionPlan>;
+      }
+      
+      throw new Error('Invalid response format');
+    } catch (error: any) {
+      console.error('Error in updatePlan:', error);
+      if (error.response) {
+        console.error('Error response:', error.response.data);
+        console.error('Error status:', error.response.status);
+        
+        return {
+          value: {} as SubscriptionPlan,
+          isSuccess: false,
+          isFailure: true,
+          error: {
+            code: error.response.status?.toString() || 'UNKNOWN',
+            description: error.response.data?.error?.description 
+              || error.response.data?.message 
+              || error.response.data?.name?.[0] // Validation error
+              || 'Không thể cập nhật gói đăng ký'
+          }
+        };
+      } else if (error.request) {
+        throw new Error('Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.');
+      } else {
+        throw error;
+      }
+    }
+  },
+
+  // Delete subscription plan
+  deletePlan: async (subscriptionId: string): Promise<ApiResponse<any>> => {
+    try {
+      console.log('Deleting subscription plan:', subscriptionId);
+      const response = await api.delete<any>(`/Subscription/plans/${subscriptionId}`);
+      
+      console.log('Delete subscription plan response:', response);
+      console.log('Delete subscription plan response.data:', response.data);
+      console.log('Delete subscription plan response.status:', response.status);
+      
+      // If status is 200/204 and no error, consider it success
+      if (response.status === 200 || response.status === 204) {
+        // Check if response is already ApiResponse format
+        if (response.data && typeof response.data === 'object' && 'isSuccess' in response.data) {
+          return response.data;
+        }
+        
+        // If response is empty or null, consider it success (common for DELETE)
+        if (!response.data || response.data === null || response.data === '') {
+          return {
+            value: {},
+            isSuccess: true,
+            isFailure: false
+          } as ApiResponse<any>;
+        }
+        
+        // If response has a value property
+        if (response.data && response.data.value !== undefined) {
+          return {
+            value: response.data.value,
+            isSuccess: true,
+            isFailure: false
+          } as ApiResponse<any>;
+        }
+        
+        // Default: success if status is 200/204
+        return {
+          value: {},
+          isSuccess: true,
+          isFailure: false
+        } as ApiResponse<any>;
+      }
+      
+      // If status is not 200/204, treat as error
+      return {
+        value: {},
+        isSuccess: false,
+        isFailure: true,
+        error: {
+          code: response.status?.toString() || 'UNKNOWN',
+          description: response.data?.error?.description || response.data?.message || 'Không thể xóa gói đăng ký'
+        }
+      };
+    } catch (error: any) {
+      console.error('Error in deletePlan:', error);
+      if (error.response) {
+        console.error('Error response:', error.response.data);
+        console.error('Error status:', error.response.status);
+        
+        // If status is 200/204, consider it success even if caught as error
+        if (error.response.status === 200 || error.response.status === 204) {
+          return {
+            value: {},
+            isSuccess: true,
+            isFailure: false
+          } as ApiResponse<any>;
+        }
+        
+        return {
+          value: {},
+          isSuccess: false,
+          isFailure: true,
+          error: {
+            code: error.response.status?.toString() || 'UNKNOWN',
+            description: error.response.data?.error?.description || error.response.data?.message || 'Không thể xóa gói đăng ký'
           }
         };
       } else if (error.request) {
